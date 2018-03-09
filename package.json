@@ -6,6 +6,8 @@
   },
   "dependencies": {
       "pixelsmithmix": "git+https://github.com/liupishui/pixelsmithmix.git",
+      "imagemin": "^5.2.1",
+      "imagemin-pngquant": "^5.0.0",
       "psd": "^3.2.0"
   },
   "homepage": "https://github.com/liupishui/psd2htmlmix#readme",
