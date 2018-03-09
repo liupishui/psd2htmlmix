@@ -12,7 +12,7 @@ const imageminPngquant = require('imagemin-pngquant');
 //var images = require("images");
 
 // Load in our dependencies
-var Pixelsmith = require('pixelsmith');
+var Pixelsmith = require('pixelsmithmix');
 
 // Create a new engine
 var pixelsmith = new Pixelsmith();
