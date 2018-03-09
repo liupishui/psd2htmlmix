@@ -1,8 +1,8 @@
 /*
 * @Author: liupishui
 * @Date:   2018-02-07 19:46:55
-* @Last Modified by:   liupishui
-* @Last Modified time: 2018-03-08 22:32:53
+* @Last Modified by:   liups
+* @Last Modified time: 2018-03-09 14:24:55
 */
 var fs = require('fs');
 var path = require('path');
@@ -193,41 +193,44 @@ function psd2pngmix(psdfile,cb){
                       var styleSheetsArr = ['    .fetpsd2htmlmixBg {height:200px; position:relative; background-position:center 0;}\r\n'];//样式拼凑
                       var divDomArr = [];//dom拼凑
                       for(let i = 0; i<spriteLength; i++){
-                        var canvas = pixelsmith.createCanvas(imgs[0].width, 200);
+                        let canvas = pixelsmith.createCanvas(imgs[0].width, 200);
                         canvas.addImage(imgs[0],0,-200*i);
-                        var resultStream = canvas['export']({format:'png'});
-                        var writeStream = fs.createWriteStream(path.join(pathCurr,i+'.png'));
-                        resultStream.pipe(writeStream);
+                        let imgData = [];
+                        let resultStream = canvas['export']({format:'png'});
+                        resultStream.on('data',function(chunk){
+                          imgData.push(chunk);
+                          //console.log(imgData);
+                        });
+                        resultStream.on('end',function(){
+                          //console.log(Buffer.concat(imgData));
+                            imageminPngquant()(Buffer.concat(imgData)).then((rst)=>{
+                                fs.writeFileSync(path.join(pathCurr,i+'.png'),rst);
+                            },(err)=>{
+                            })
+                        })
 
                         styleSheetsArr.push('    .fetpsd2htmlmixBg'+i+' {background-image:url(images/'+i+'.png);}\r\n');
                         divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+i+'"></div>');
                       }
                       if(spriteNext){
-                        var canvas = pixelsmith.createCanvas(imgs[0].width, spriteNext);
+                        let canvas = pixelsmith.createCanvas(imgs[0].width, spriteNext);
                         canvas.addImage(imgs[0],0,spriteNext-imgs[0].height);
-                        var resultStream = canvas['export']({format:'png'});
-                        var writeStream = fs.createWriteStream(path.join(pathCurr,spriteLength+'.png'));
-                        resultStream.pipe(writeStream);
+                        let imgData = [];
+                        let resultStream = canvas['export']({format:'png'});
+                        resultStream.on('data',function(chunk){
+                          imgData.push(chunk);
+                        });
+                        resultStream.on('end',function(){
+                            imageminPngquant()(Buffer.concat(imgData)).then((rst)=>{
+                                fs.writeFileSync(path.join(pathCurr,spriteLength+'.png'),rst);
+                            },(err)=>{
+                            })
+                        })
 
                         styleSheetsArr.push('    .fetpsd2htmlmixBg'+spriteLength+' {background-image:url(images/'+spriteLength+'.png);height:'+spriteNext+'px;}\r\n');
                         divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+spriteLength+'"></div>');
                       }
-                      var compressPng=function(index){
-                        var imgData = fs.readFileSync(path.join(pathCurr,index+'.png'));
-                            imageminPngquant()(imgData).then((rst)=>{
-                                fs.writeFileSync(path.join(pathCurr,index+'.png'),rst);
-                                index = index-1;
-                                if(index>-1){
-                                  compressPng(index);
-                                }
-                            },(err)=>{
-                                  index = index-1;
-                                if(index>-1){
-                                  compressPng(index);
-                                }
-                            })
-                      }
-                      setTimeout(function(){compressPng(Math.ceil(imgs[0].height/200)-1);},200)
+
                       var htmlMixAll = htmlStrTop.concat(styleSheetsArr,htmlStrCenter,divDomArr,htmlStrBottom).join('\r\n');
                       fs.writeFileSync(path.join(pathTarget,'index.html'),htmlMixAll);
                     });
