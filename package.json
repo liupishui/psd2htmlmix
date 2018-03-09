@@ -1,61 +1,20 @@
 {
-  "_from": "git+https://github.com/liupishui/psd2htmlmix.git",
-  "_id": "psd2htmlmix@1.0.0",
-  "_inBundle": false,
-  "_integrity": "sha1-0AeESiwMTC0XKfWgprJgqK8mbVc=",
-  "_location": "/psd2htmlmix",
-  "_phantomChildren": {
-    "core-util-is": "1.0.2",
-    "get-pixels": "3.3.0",
-    "inherits": "2.0.3",
-    "isarray": "1.0.0",
-    "mime-types": "2.1.17",
-    "ndarray": "1.0.18",
-    "ndarray-fill": "1.0.2",
-    "obj-extend": "0.1.0",
-    "process-nextick-args": "1.0.7",
-    "save-pixels": "2.3.4",
-    "typedarray": "0.0.6",
-    "util-deprecate": "1.0.2",
-    "vinyl-file": "1.3.0"
-  },
-  "_requested": {
-    "type": "git",
-    "raw": "git+https://github.com/liupishui/psd2htmlmix.git",
-    "rawSpec": "git+https://github.com/liupishui/psd2htmlmix.git",
-    "saveSpec": "git+https://github.com/liupishui/psd2htmlmix.git",
-    "fetchSpec": "https://github.com/liupishui/psd2htmlmix.git",
-    "gitCommittish": "master"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "git+https://github.com/liupishui/psd2htmlmix.git#bec1e9005ac0f874e406c3ef6040dee6ed84f5fd",
-  "_spec": "git+https://github.com/liupishui/psd2htmlmix.git",
-  "_where": "C:\\Users\\LIUPS\\fet",
+  "name": "psd2htmlmix",
   "author": "",
   "bugs": {
     "url": "https://github.com/liupishui/psd2htmlmix/issues"
   },
-  "bundleDependencies": false,
   "dependencies": {
-    "pixelsmith": "git+https://github.com/liupishui/pixelsmith.git",
-    "psd": "^3.2.0"
+      "pixelsmithmix": "git+https://github.com/liupishui/pixelsmithmix.git",
+      "psd": "^3.2.0"
   },
-  "deprecated": false,
-  "description": "导出psd为html",
-  "devDependencies": {},
   "homepage": "https://github.com/liupishui/psd2htmlmix#readme",
-  "license": "ISC",
   "main": "index.js",
-  "name": "psd2htmlmix",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liupishui/psd2htmlmix.git"
   },
-  "scripts": {
-    "start": "electron ."
-  },
-  "version": "1.0.0"
+  "description": "导出psd为html",
+  "version": "1.0.0",
+  "license": "ISC"
 }
