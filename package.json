@@ -1,22 +1,24 @@
 {
-  "name": "psd2htmlmix",
-  "author": "",
+  "author": "liupishui",
   "bugs": {
     "url": "https://github.com/liupishui/psd2htmlmix/issues"
   },
+  "bundleDependencies": false,
   "dependencies": {
-      "pixelsmithmix": "git+https://github.com/liupishui/pixelsmithmix.git",
-      "imagemin": "^5.2.1",
-      "imagemin-pngquant": "^5.0.0",
-      "psd": "^3.2.0"
+    "imagemin-pngquant": "^5.0.0",
+    "imagemin-jpeg-recompress": "^5.1.0",
+    "pixelsmithmix": "git+https://github.com/liupishui/pixelsmithmix.git",
+    "psd": "^3.2.0"
   },
+  "deprecated": false,
+  "description": "导出psd为html",
   "homepage": "https://github.com/liupishui/psd2htmlmix#readme",
+  "license": "ISC",
   "main": "index.js",
+  "name": "psd2htmlmix",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liupishui/psd2htmlmix.git"
   },
-  "description": "导出psd为html",
-  "version": "1.0.0",
-  "license": "ISC"
+  "version": "1.0.0"
 }
