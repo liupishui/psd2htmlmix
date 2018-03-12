@@ -2,13 +2,13 @@
 * @Author: liupishui
 * @Date:   2018-02-07 19:46:55
 * @Last Modified by:   liups
-* @Last Modified time: 2018-03-09 14:24:55
+* @Last Modified time: 2018-03-12 09:39:44
 */
 var fs = require('fs');
 var path = require('path');
 var PSD = require('psd');
-const imagemin = require('imagemin');
 const imageminPngquant = require('imagemin-pngquant');
+const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 //var images = require("images");
 
 // Load in our dependencies
@@ -59,7 +59,7 @@ function scanTree(psdfile,processing){
         }
     }
 }
-function psd2pngmix(psdfile,cb){
+function psd2pngmix(psdfile,cb,exportimgType){
     var psdfile=psdfile.path;
     if(psdfile.indexOf('.psd') == -1){
         cb()
@@ -196,38 +196,53 @@ function psd2pngmix(psdfile,cb){
                         let canvas = pixelsmith.createCanvas(imgs[0].width, 200);
                         canvas.addImage(imgs[0],0,-200*i);
                         let imgData = [];
-                        let resultStream = canvas['export']({format:'png'});
+                        let resultStream = canvas['export']({format:exportimgType == '.jpg' ?'jpg':'png'});
                         resultStream.on('data',function(chunk){
                           imgData.push(chunk);
                           //console.log(imgData);
                         });
                         resultStream.on('end',function(){
                           //console.log(Buffer.concat(imgData));
+                          if(exportimgType == '.jpg'){
+                                imageminJpegRecompress({max:85})(Buffer.concat(imgData)).then((rst) => {
+                                    fs.writeFileSync(path.join(pathCurr,i+'.jpg'),rst);
+                                },(err) =>{
+
+                                })
+                          }else{
                             imageminPngquant()(Buffer.concat(imgData)).then((rst)=>{
                                 fs.writeFileSync(path.join(pathCurr,i+'.png'),rst);
                             },(err)=>{
                             })
+                          }
                         })
 
-                        styleSheetsArr.push('    .fetpsd2htmlmixBg'+i+' {background-image:url(images/'+i+'.png);}\r\n');
+                        styleSheetsArr.push('    .fetpsd2htmlmixBg'+i+' {background-image:url(images/'+i+exportimgType+');}\r\n');
                         divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+i+'"></div>');
                       }
                       if(spriteNext){
                         let canvas = pixelsmith.createCanvas(imgs[0].width, spriteNext);
                         canvas.addImage(imgs[0],0,spriteNext-imgs[0].height);
                         let imgData = [];
-                        let resultStream = canvas['export']({format:'png'});
+                        let resultStream = canvas['export']({format:exportimgType == '.jpg' ?'jpg':'png'});
                         resultStream.on('data',function(chunk){
                           imgData.push(chunk);
                         });
                         resultStream.on('end',function(){
+                          if(exportimgType == '.jpg'){
+                            imageminJpegRecompress({max:85})(Buffer.concat(imgData)).then((rst) => {
+                                fs.writeFileSync(path.join(pathCurr,spriteLength+'.jpg'),rst)
+                            },(err) =>{
+                            })
+                          }else{
                             imageminPngquant()(Buffer.concat(imgData)).then((rst)=>{
                                 fs.writeFileSync(path.join(pathCurr,spriteLength+'.png'),rst);
                             },(err)=>{
                             })
+                          }
                         })
 
-                        styleSheetsArr.push('    .fetpsd2htmlmixBg'+spriteLength+' {background-image:url(images/'+spriteLength+'.png);height:'+spriteNext+'px;}\r\n');
+                        styleSheetsArr.push('    .fetpsd2htmlmixBg'+spriteLength+' {background-image:url(images/'+spriteLength+exportimgType+');height:'+spriteNext+'px;}\r\n');
                         divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+spriteLength+'"></div>');
                       }
 
@@ -239,7 +254,8 @@ function psd2pngmix(psdfile,cb){
         });
     };
 }
-function psd2pngmixauto(path,cbauto){
+function psd2pngmixauto(path,cbauto,exportimgType){
+  console.log(exportimgType);
     var allFile=[];
     if(fs.existsSync(path)){
         var pathInfo=fs.statSync(path);
@@ -248,15 +264,15 @@ function psd2pngmixauto(path,cbauto){
         }else{
             allFile.push({path:path});
         }
-        var parseAllFile=function(arr,cbauto){
+        var parseAllFile=function(arr,cbauto,exportimgType){
             if(arr.length==0){
                 cbauto();
             }else{
                 var fileCurr=arr.splice(-1)[0];
-                psd2pngmix(fileCurr,function(filename){cbauto(filename);parseAllFile(arr,cbauto)});
+                psd2pngmix(fileCurr,function(filename){cbauto(filename);parseAllFile(arr,cbauto)},exportimgType);
             }
         }
-        parseAllFile(allFile,cbauto);
+        parseAllFile(allFile,cbauto,exportimgType);
     }else{
         cbauto();
         console.log('没有该文件');
