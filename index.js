@@ -2,7 +2,7 @@
 * @Author: liupishui
 * @Date:   2018-02-07 19:46:55
 * @Last Modified by:   liups
-* @Last Modified time: 2018-03-12 09:39:44
+* @Last Modified time: 2018-09-05 09:37:19
 */
 var fs = require('fs');
 var path = require('path');
@@ -67,13 +67,23 @@ function psd2pngmix(psdfile,cb,exportimgType){
     }
     var replaceLayers = [];
     var replaceLayersRecord = [];
+    var linkLayersStyle = [];
+    var linkLayersHtml = [];
     //console.log(psdfile);
+    var linkCount = 0;
     var psd = PSD.fromFile(psdfile);
     if (psd.parse()) {
         scanTree(psdfile,function(Layer){
-            if(Layer.name.indexOf('.psd') != '-1'){
+            if(Layer.name.indexOf('.psd') == Layer.name.length-4){
                 replaceLayers.push(Layer);
                 replaceLayersRecord.push(Layer);
+            }
+            if (Layer.name.indexOf('link:') == 0) {
+                //按钮添加
+                //link:href|className
+                linkCount++;
+                linkLayersStyle.push('.links' + linkCount + ' {width:'+Layer.width+'px;height:'+Layer.height+'px;margin-left:' + (Layer.left - psd.header.width / 2) + 'px;top:'+Layer.top+'px;}');
+                linkLayersHtml.push('<a href="../' + path.dirname(Layer.name.split(':')[1].split('|')[0]) +'/'+ path.basename(Layer.name.split(':')[1].split('|')[0], '.psd') + '/index.html" class="links links' + linkCount + ' ' + (Layer.name.split(':')[1].split('|')[1] ? Layer.name.split(':')[1].split('|')[1] : '') + '">' + path.basename(Layer.name.split(':')[1].split('|')[0],'.psd') + '</a>');
             }
         })
         var destPath = path.join(path.dirname(psdfile), path.basename(psdfile, '.psd') + '.png');
@@ -175,22 +185,28 @@ function psd2pngmix(psdfile,cb,exportimgType){
                                        '    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />',
                                        '    <meta name="renderer" content="webkit">',
                                        '    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />',
-                                       '    <title>文档的标题</title>',
+                                       '    <title>' + path.basename(psdfile,'.psd') + '</title>',
                                        '    <meta name="keywords" content="关键字" />',
                                        '    <meta name="description" content="描述" />',
                                        '    <style type="text/css">',
                                        '        .container_fetpsd2htmlmixBg{ position:relative;',
-                                       '            min-width:946px;',
-                                       '            _width:expression(document.body.clientWidth < 946 ? "946" : "auto");',
+                                       '            min-width:1200px;',
+                                       '            _width:expression(document.body.clientWidth < 1200 ? "1200" : "auto");',
                                        '        }'];
+                      htmlStrTop = [...htmlStrTop, ...linkLayersStyle];
                       var htmlStrCenter = ['    </style>',
                                            '</head>',
                                            '<body>',
                                            '    <div class="container_fetpsd2htmlmixBg">'];
+                      //console.log(linkLayersHtml);
+                      htmlStrCenter = [...htmlStrCenter, ...linkLayersHtml];
                       var htmlStrBottom = ['    </div>',
                                            '</body>',
                                            '</html>'];
-                      var styleSheetsArr = ['    .fetpsd2htmlmixBg {height:200px; position:relative; background-position:center 0;}\r\n'];//样式拼凑
+                      var styleSheetsArr = ['    .fetpsd2htmlmixBg {height:200px; position:relative; background-position:center 0;background-repeat:no-repeat;}\r\n',
+                      '.links{position:absolute;left:50%;display:block;z-index:92;overflow:hidden;text-indent:-999em;background:#fff;opacity:0;filter:alpha(opacity=0);}',
+                      '.links:hover{opacity:.2;filter:alpha(opacity=20);}'
+                      ];//样式拼凑
                       var divDomArr = [];//dom拼凑
                       for(let i = 0; i<spriteLength; i++){
                         let canvas = pixelsmith.createCanvas(imgs[0].width, 200);
@@ -216,7 +232,6 @@ function psd2pngmix(psdfile,cb,exportimgType){
                             })
                           }
                         })
-
                         styleSheetsArr.push('    .fetpsd2htmlmixBg'+i+' {background-image:url(images/'+i+exportimgType+');}\r\n');
                         divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+i+'"></div>');
                       }
@@ -255,7 +270,6 @@ function psd2pngmix(psdfile,cb,exportimgType){
     };
 }
 function psd2pngmixauto(path,cbauto,exportimgType){
-  console.log(exportimgType);
     var allFile=[];
     if(fs.existsSync(path)){
         var pathInfo=fs.statSync(path);
