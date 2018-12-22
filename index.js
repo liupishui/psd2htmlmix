@@ -1,8 +1,8 @@
 /*
 * @Author: liupishui
 * @Date:   2018-02-07 19:46:55
-* @Last Modified by:   liups
-* @Last Modified time: 2018-09-05 09:37:19
+* @Last Modified by:   liupishui
+* @Last Modified time: 2018-12-22 17:57:37
 */
 var fs = require('fs');
 var path = require('path');
@@ -184,15 +184,31 @@ function psd2pngmix(psdfile,cb,exportimgType){
                                        '<head>',
                                        '    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />',
                                        '    <meta name="renderer" content="webkit">',
+                                       '<meta name="viewport" content="width=device-width,initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">',
                                        '    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />',
                                        '    <title>' + path.basename(psdfile,'.psd') + '</title>',
                                        '    <meta name="keywords" content="关键字" />',
                                        '    <meta name="description" content="描述" />',
                                        '    <style type="text/css">',
+                                       '        body{margin:0;}',
                                        '        .container_fetpsd2htmlmixBg{ position:relative;',
                                        '            min-width:1200px;',
                                        '            _width:expression(document.body.clientWidth < 1200 ? "1200" : "auto");',
-                                       '        }'];
+                                       '        }',
+                                        '    img{display:none;}',
+                                        '     @media screen and ( max-width: 650px ){',
+                                        '          .container_fetpsd2htmlmixBg{',
+                                        '            min-width: 1%;',
+                                        '          }',
+                                        '          .fetpsd2htmlmixBg{',
+                                        '            display:none;',
+                                        '          }',
+                                        '          img{',
+                                        '            display:block;',
+                                        '            max-width: 100%;',
+                                        '             pointer-events: none;',
+                                        '          }',
+                                        '    }'];
                       htmlStrTop = [...htmlStrTop, ...linkLayersStyle];
                       var htmlStrCenter = ['    </style>',
                                            '</head>',
@@ -233,7 +249,7 @@ function psd2pngmix(psdfile,cb,exportimgType){
                           }
                         })
                         styleSheetsArr.push('    .fetpsd2htmlmixBg'+i+' {background-image:url(images/'+i+exportimgType+');}\r\n');
-                        divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+i+'"></div>');
+                        divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+i+'"></div><img src="images/'+i+exportimgType+'"/>');
                       }
                       if(spriteNext){
                         let canvas = pixelsmith.createCanvas(imgs[0].width, spriteNext);
@@ -258,7 +274,7 @@ function psd2pngmix(psdfile,cb,exportimgType){
                         })
 
                         styleSheetsArr.push('    .fetpsd2htmlmixBg'+spriteLength+' {background-image:url(images/'+spriteLength+exportimgType+');height:'+spriteNext+'px;}\r\n');
-                        divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+spriteLength+'"></div>');
+                        divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+spriteLength+'"></div><img src="images/'+spriteLength+exportimgType+'"/>');
                       }
 
                       var htmlMixAll = htmlStrTop.concat(styleSheetsArr,htmlStrCenter,divDomArr,htmlStrBottom).join('\r\n');
