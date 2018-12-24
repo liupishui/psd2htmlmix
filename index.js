@@ -1,8 +1,8 @@
 /*
 * @Author: liupishui
 * @Date:   2018-02-07 19:46:55
-* @Last Modified by:   liupishui
-* @Last Modified time: 2018-12-22 17:57:37
+* @Last Modified by:   liups
+* @Last Modified time: 2018-12-24 10:41:56
 */
 var fs = require('fs');
 var path = require('path');
@@ -83,7 +83,11 @@ function psd2pngmix(psdfile,cb,exportimgType){
                 //link:href|className
                 linkCount++;
                 linkLayersStyle.push('.links' + linkCount + ' {width:'+Layer.width+'px;height:'+Layer.height+'px;margin-left:' + (Layer.left - psd.header.width / 2) + 'px;top:'+Layer.top+'px;}');
-                linkLayersHtml.push('<a href="../' + path.dirname(Layer.name.split(':')[1].split('|')[0]) +'/'+ path.basename(Layer.name.split(':')[1].split('|')[0], '.psd') + '/index.html" class="links links' + linkCount + ' ' + (Layer.name.split(':')[1].split('|')[1] ? Layer.name.split(':')[1].split('|')[1] : '') + '">' + path.basename(Layer.name.split(':')[1].split('|')[0],'.psd') + '</a>');
+                if (Layer.name.indexOf('http://')!=-1||Layer.name.indexOf('https://')!=-1) {
+                  linkLayersHtml.push('<a href="'+Layer.name.substr(5)+'" class="links links' + linkCount + ' ' + (Layer.name.split(':')[2].split('|')[1] ? Layer.name.split(':')[2].split('|')[1] : '') + '" target="_blank">' + Layer.name.split(':')[2].split('|')[0] + '</a>');
+                }else{
+                  linkLayersHtml.push('<a href="../' + path.dirname(Layer.name.split(':')[1].split('|')[0]) +'/'+ path.basename(Layer.name.split(':')[1].split('|')[0], '.psd') + '/index.html" class="links links' + linkCount + ' ' + (Layer.name.split(':')[1].split('|')[1] ? Layer.name.split(':')[1].split('|')[1] : '') + '">' + path.basename(Layer.name.split(':')[1].split('|')[0],'.psd') + '</a>');
+                }
             }
         })
         var destPath = path.join(path.dirname(psdfile), path.basename(psdfile, '.psd') + '.png');
@@ -196,7 +200,7 @@ function psd2pngmix(psdfile,cb,exportimgType){
                                        '            _width:expression(document.body.clientWidth < 1200 ? "1200" : "auto");',
                                        '        }',
                                         '    img{display:none;}',
-                                        '     @media screen and ( max-width: 650px ){',
+                                        '     @media screen and ( max-width: 751px ){',
                                         '          .container_fetpsd2htmlmixBg{',
                                         '            min-width: 1%;',
                                         '          }',
@@ -276,8 +280,43 @@ function psd2pngmix(psdfile,cb,exportimgType){
                         styleSheetsArr.push('    .fetpsd2htmlmixBg'+spriteLength+' {background-image:url(images/'+spriteLength+exportimgType+');height:'+spriteNext+'px;}\r\n');
                         divDomArr.push('      <div class="fetpsd2htmlmixBg fetpsd2htmlmixBg'+spriteLength+'"></div><img src="images/'+spriteLength+exportimgType+'"/>');
                       }
-
-                      var htmlMixAll = htmlStrTop.concat(styleSheetsArr,htmlStrCenter,divDomArr,htmlStrBottom).join('\r\n');
+                      var htmlStrBottomScript = ['<script type="text/javascript">',
+                                                 '  var resizeLinkPosition = function(){',
+                                                 '  var baseWidth=parseInt(Math.min.apply(\'\',[window.screen.width,document.getElementsByTagName(\'body\')[0].offsetWidth]));',
+                                                 '      if(baseWidth<751){',
+                                                 '        var img = new Image();',
+                                                 '        img.onload=function(){',
+                                                 '          var rate =baseWidth/this.width;',
+                                                 '          var links = document.querySelectorAll(\'.links\');',
+                                                 '          for(var link in links){',
+                                                 '            if(typeof(links[link])==\'object\'){',
+                                                 '              var currStyle = getComputedStyle(links[link],null);',
+                                                 '              var computedStyle = [',
+                                                 '                \'width:\'+parseInt(currStyle[\'width\'])*rate+\'px\',',
+                                                 '                \'height:\'+parseInt(currStyle[\'height\'])*rate+\'px\',',
+                                                 '                \'margin-left:\'+parseInt(currStyle[\'margin-left\'])*rate+\'px\',',
+                                                 '                \'top:\'+parseInt(currStyle[\'top\'])*rate+\'px\'',
+                                                 '              ]',
+                                                 '              links[link].style.cssText+=\';\'+computedStyle.join(\';\');',
+                                                 '            };',
+                                                 '          };',
+                                                 '        }',
+                                                 '        img.src=document.querySelector(\'img\').src+\'?t=\'+-new Date();',
+                                                 '      }else{',
+                                                 '          var links = document.querySelectorAll(\'.links\');',
+                                                 '          for(var link in links){',
+                                                 '            if(typeof(links[link])==\'object\'){',
+                                                 '               links[link].style.cssText=\' \';',
+                                                 '            };',
+                                                 '          };',
+                                                 '      }',
+                                                 '  }',
+                                                 '  resizeLinkPosition();',
+                                                 '  window.onresize=function(){',
+                                                 '    resizeLinkPosition();',
+                                                 '  }',
+                                                 '</script>'];
+                      var htmlMixAll = htmlStrTop.concat(styleSheetsArr,htmlStrCenter,divDomArr,htmlStrBottom,htmlStrBottomScript).join('\r\n');
                       fs.writeFileSync(path.join(pathTarget,'index.html'),htmlMixAll);
                     });
                 cb(imagesAll[0]);
